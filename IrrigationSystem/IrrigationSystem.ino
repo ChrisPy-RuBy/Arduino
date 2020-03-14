@@ -1,6 +1,108 @@
+#include <Wire.h>
+#include "RTClib.h"
+#include "DHT.h"
 
+// Analogue pin
+const int RTC_5V_PIN = A3;
+const int RTC_GND_PIN = A2;
 
+// Digital pins
+const int DHT_pin = 2;
+const int WATER_VALVE_0_PIN = 8;
+const int WATER_VALVE_1_PIN = 7;
+const int WATER_VALVE_2_PIN = 4;
 
+const int NUMBEROFVALVES = 3;
+const int NUMBEROFTIMES = 2;
+
+int onOffTimes [NUMBEROFVALVES][NUMBEROFTIMES];
+int valvePinNumbers[NUMBEROFVALVES];
+
+const int ONTIME = 0;
+const int OFFTIME = 1;
+
+#define DHTTYPE DHT11
+DHT dht(DHT_PIN, DHTTYPE);
+
+RTC_DS1307 rtc;
+
+DateTime dateTimeNow;
+
+float HumidityNow;
+
+void setup {
+
+        // Power annd ground to RTC
+        pinMode(RTC_5V_PIN, OUTPUT);
+        pinMode(RTC_GND_PIN, OUTPUT);
+        digitalWrite(RTC_5V_PIN, HIGH);
+        digitalWrite(RTC_GND_PIN, LOW);
+
+#ifdef AVR
+        Wire.begin();
+#else
+        Wire1.begin();
+#endif
+
+        rtc.begin();
+        dht.begin();
+        Serial.begin(9600);
+
+        valvePinNumbers[0] = WATER_VALVE_0_PIN;
+
+        for (int valve = 0; valve < NUMBEROFVALVES; valve++) {
+                pinMode(valvePinNumbers[valve], OUTPUT);
+        }
+
+}
+
+void loop() {
+
+        Serial.print("Type 'P' to print settings or ");
+        Serial.println(" 'S2N13:45' to set valve 2 OIN time time to 13:34 ");
+
+        getTimeTempHumidity();
+        
+        checkUserInteraction();
+
+        checkTimeControlValves();
+
+        delay(5000);
+}
+
+void getTimeTempHumidity() {
+
+        dateTimeNow = rtc.now();
+
+        if (! rtc.isrunning()) {
+        Serial.println("RTC is not running!");
+        return;
+        }
+
+        Serial.print(dateTimeNow.hour(), DEC);
+        Serial.print(':');
+        Serial.print(dateTimeNow.minute(), DEC);
+        Serial.print(':');
+        Serial.print(dateTimeNow.second(), DEC);
+
+        humidityNow = dht.readHumidity();
+        float t = dht.readTemperature();
+        float f = dht.readTemperature(true);
+
+        if (isnan(humidityNow) || isnan(t) || isnan(f)) {
+                Serial.println("Failed to read from DHT sensor!");
+                return;
+        }
+
+        Serial.print(" Humidity ");
+        Serial.print(humidityNow);
+        Serial.print("% ");
+        Serial.print("Temp ");
+        Serial.print(t);
+        Serial.print("C ");
+        Serial.print(f);
+        Serial.print("F");
+        Serial.println();
 }
 
 void checkUserInteraction() {
@@ -111,27 +213,27 @@ void checkTimeControlValves() {
                                         onOffTimes[valve][ONTIME])) &&
                         ( nowMinutesSinceMidnight <
                           onOffTimes[valve][OFFTIME]) {
-                          
-                        // Before we turn a valve on make sure that its not raining
-                        if ( humidityNow > 70 ) {
-                                // its raining; turn the valve OFF
-                                Serial.print(" OFF ");
-                                digitalWrite(valvePinNumbers[valve], LOW);
-                        }
-                        else {
-                                //No rain and its time ot turn the valve ON
-                                Serial.print(" ON ");
-                                digitalWrite(valvePinNumbers[valve][, HIGH]);
+
+                                // Before we turn a valve on make sure that its not raining
+                                if ( humidityNow > 70 ) {
+                                        // its raining; turn the valve OFF
+                                        Serial.print(" OFF ");
+                                        digitalWrite(valvePinNumbers[valve], LOW);
+                                }
+                                else {
+                                        //No rain and its time ot turn the valve ON
+                                        Serial.print(" ON ");
+                                        digitalWrite(valvePinNumbers[valve][, HIGH]);
                                 } // end of checking for rain
                         } // end of checking for time to turn valve ON
-                        else {
-                                Serial.print(" OFF ");
-                                digitalWrite(valvePinNumbers[valve], LOW);
-                        }
-                        Serial.println();
-                } // end of looping over each valve
+                else {
+                        Serial.print(" OFF ");
+                        digitalWrite(valvePinNumbers[valve], LOW);
+                }
                 Serial.println();
-}               
+        } // end of looping over each valve
+        Serial.println();
+}
 
 void printMenu() {
         Serial.println(
