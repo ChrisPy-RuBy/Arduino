@@ -7,7 +7,7 @@ const int RTC_5V_PIN = A3;
 const int RTC_GND_PIN = A2;
 
 // Digital pins
-const int DHT_pin = 2;
+const int DHT_PIN = 2;
 const int WATER_VALVE_0_PIN = 8;
 const int WATER_VALVE_1_PIN = 7;
 const int WATER_VALVE_2_PIN = 4;
@@ -28,9 +28,9 @@ RTC_DS1307 rtc;
 
 DateTime dateTimeNow;
 
-float HumidityNow;
+float humidityNow;
 
-void setup {
+void setup() {
 
         // Power annd ground to RTC
         pinMode(RTC_5V_PIN, OUTPUT);
@@ -62,7 +62,7 @@ void loop() {
         Serial.println(" 'S2N13:45' to set valve 2 OIN time time to 13:34 ");
 
         getTimeTempHumidity();
-        
+
         checkUserInteraction();
 
         checkTimeControlValves();
@@ -75,8 +75,8 @@ void getTimeTempHumidity() {
         dateTimeNow = rtc.now();
 
         if (! rtc.isrunning()) {
-        Serial.println("RTC is not running!");
-        return;
+                Serial.println("RTC is not running!");
+                return;
         }
 
         Serial.print(dateTimeNow.hour(), DEC);
@@ -147,7 +147,7 @@ void expectValveSetting() {
         int valveNumber = Serial.parseInt();
 
         // the next character should be either N or F
-        char onOff = serial.read();
+        char onOff = Serial.read();
 
         int desiredHour = Serial.parseInt(); // the hour
 
@@ -184,8 +184,8 @@ void expectValveSetting() {
                         = desiredMinutesSinceMidnight;
         }
         else { // user didnt use N or F
-                Serial.print("You must use upper case N or F ");$
-                        Serial.println("to indicate ON time or OFF time");$
+                Serial.print("You must use upper case N or F ");
+                        Serial.println("to indicate ON time or OFF time");
                         Serial.flush();
                 return;
         }
@@ -209,10 +209,10 @@ void checkTimeControlValves() {
                 Serial.print(valve);
 
                 Serial.print(" is now ");
-                if (( nowMiniutesSinceMidnight >=
-                                        onOffTimes[valve][ONTIME])) &&
+                if (( nowMinutesSinceMidnight >=
+                                        onOffTimes[valve][ONTIME]) &&
                         ( nowMinutesSinceMidnight <
-                          onOffTimes[valve][OFFTIME]) {
+                          onOffTimes[valve][OFFTIME])) {
 
                                 // Before we turn a valve on make sure that its not raining
                                 if ( humidityNow > 70 ) {
@@ -223,7 +223,7 @@ void checkTimeControlValves() {
                                 else {
                                         //No rain and its time ot turn the valve ON
                                         Serial.print(" ON ");
-                                        digitalWrite(valvePinNumbers[valve][, HIGH]);
+                                        digitalWrite(valvePinNumbers[valve], HIGH);
                                 } // end of checking for rain
                         } // end of checking for time to turn valve ON
                 else {
