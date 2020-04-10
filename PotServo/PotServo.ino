@@ -1,4 +1,4 @@
-nclude <Servo.h>
+#include <Servo.h>
 
 int potPin = 0;
 int servoPin = 9;
