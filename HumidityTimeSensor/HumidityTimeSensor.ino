@@ -1,8 +1,3 @@
-// Need to add functionality now to turn on the pump 
-// depending on the state of the humidity monitor
-
-
-
 // Setup the debug LED
 const int LED_1_R = 11;
 const int LED_1_G = 12;
@@ -16,6 +11,14 @@ const int LED_1_B = 13;
 
 DHT dht(DHTPIN, DHTTYPE);
 
+// Setup the pump
+const int PUMP_PIN = 6;
+
+// Setup the POT
+const int POT = A0;
+int c1 = 0;
+int c2 = 0;
+
 void setup() {
 
         Serial.begin(9600);
@@ -25,9 +28,15 @@ void setup() {
         pinMode(LED_1_G, OUTPUT);
         pinMode(LED_1_B, OUTPUT);
 
+        // setup pump
+        pinMode(PUMP_PIN, OUTPUT);
+
         // setup humidity monitor
         dht.begin();
-}
+
+        // setup POT
+        //pinMode(POT, INPUT);
+}       
 
 void loop() {
 
@@ -53,18 +62,22 @@ void red() {
         digitalWrite(LED_1_R, HIGH);
         digitalWrite(LED_1_G, LOW);
         digitalWrite(LED_1_B, LOW);
+        //analogWrite(PUMP_PIN, 125);  // Can vary the motor speed using PWM between 100 and 250
+        pumpRate();
 }
 
 void green() {
         digitalWrite(LED_1_R, LOW);
         digitalWrite(LED_1_G, HIGH);
         digitalWrite(LED_1_B, LOW);
+        digitalWrite(PUMP_PIN, LOW);
 }
 
 void yellow() {
         digitalWrite(LED_1_R, LOW);
         digitalWrite(LED_1_G, HIGH);
         digitalWrite(LED_1_B, HIGH);
+        digitalWrite(PUMP_PIN, LOW);
 }
 
 void serialWrite(float h, float t) {
@@ -82,3 +95,12 @@ void serialWrite(float h, float t) {
   Serial.print(t);
   Serial.print(F("°C "));
 }
+
+void pumpRate() {
+        c2 = analogRead(POT);
+        // need to get the number 1024 to 0 down to 100 to 250
+        c1 = 1024-c2;
+        analogWrite(PUMP_PIN, c1 / 4);
+}
+
+
