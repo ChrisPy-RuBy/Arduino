@@ -12,7 +12,7 @@ void setup() {
         digitalWrite(A3, HIGH);
         digitalWrite(A2, LOW);
         while (!Serial); //for Leonardo/Mirco/Zero
-        Serial.begin(57600);
+        Serial.begin(9600);
         if (! rtc.begin()) {
                 Serial.println("Couldn't find RTC");
                 while (1);
@@ -27,7 +27,6 @@ void setup() {
         }
 }
 
-
 void loop() {
         DateTime now = rtc.now();
         Serial.print(now.year(), DEC);
@@ -37,6 +36,7 @@ void loop() {
         Serial.print(now.day(), DEC);
         Serial.print(" (");
         Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
+        Serial.print(" ");
         Serial.print(now.hour(), DEC);
         Serial.print(':');
         Serial.print(now.second(), DEC);

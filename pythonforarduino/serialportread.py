@@ -12,7 +12,6 @@ import datetime
 ser = serial.Serial('/dev/ttyACM0', 9600)
 time.sleep(2)
 
-
 data = []
 
 try: 
@@ -20,9 +19,9 @@ try:
     filename = './sensortest.csv'
     with open(filename, 'w') as f:
         writer = csv.writer(f)
-        while counter < 1000:
+        while counter < 10:
             line = ser.readline()
-            value = line.decode().strip()
+            value = line.decode('utf-8').strip()
             now = datetime.datetime.now().isoformat()
             print(now, value)
             row = [now, value]

@@ -7,7 +7,8 @@ set -euo pipefail
 main () {
         dir=$PWD/$1
         echo $dir
-        if [ -d "$dir" ]; then
+
+        if [[ -d "$dir" ]]; then
                 echo "Folder exists, compiling."   
                 arduino-cli compile --fqbn arduino:avr:uno $dir
                 echo "uploading"
@@ -16,5 +17,17 @@ main () {
                 echo "Folder doesn't exists" && exit 1
         fi
 }
+
+
+if [[ $# -gt 1 ]]; then
+	if [[ $2 == "-k" ]]; then
+		echo "Find and kill python processes"
+		ps aux | grep -v grep | grep python | awk '{print $2}' | xargs kill
+	else
+		echo "valid input flags are -k -> kill python processes"
+		exit 1;
+	fi
+fi
+
 
 main "$@"
