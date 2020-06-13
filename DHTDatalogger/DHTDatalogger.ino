@@ -15,6 +15,8 @@ CS = 10
 ---> RTC
 SCL -> A5
 SDA -> A4
+
+---> Ext Thermo
 DS -> 4
 
 LIBRARIES REQUIRED
@@ -23,6 +25,8 @@ LIBRARIES REQUIRED
 -> SD
 -> Wire
 -> RTClib
+-> OneWire
+-> dallasTemperature
 */
 
 // setup DHT
@@ -81,39 +85,43 @@ void loop() {
 	Serial.println("In loop");
 	sensors.requestTemperatures();
 
-	Serial.print(sensors.getTempCByIndex(0));
+	float externalTemp = sensors.getTempCByIndex(0);
 	DateTime now = rtc.now();
-	long time = now.unixtime();
+	String time = now.timestamp();
     float h = dht.readHumidity();
     float temp = dht.readTemperature();
-	serialWrite(time, h, temp);
-	saveData(time, h, temp);
+	serialWrite(time, externalTemp, h, temp);
+	saveData(time, externalTemp, h, temp);
 }
 
-void saveData(int time, float h, float temp) {
+void saveData(String time, float externalTemp, float dhth, float dhttemp) {
 	myFile = SD.open("data.txt", FILE_WRITE);
 	myFile.print(time);
 	myFile.print(",");
-	myFile.print(h);
+	myFile.print(externalTemp);
 	myFile.print(",");
-	myFile.print(temp);
+	myFile.print(dhth);
 	myFile.print(",");
+	myFile.print(dhttemp);
+	myFile.print(",\n");
 	myFile.close();
 }
 
-void serialWrite(int time, float h, float temp) {
+void serialWrite(String time, float externalTemp, float dhth, float dhttemp) {
   // Function for debug of humidity sensor
 
   // Check if any reads failed and exit early (to try again).
-  if (isnan(h) || isnan(temp)) {
+  if (isnan(dhth) || isnan(dhttemp)) {
     Serial.println(F("Failed to read from DHT sensor!"));
     return;
   }
   Serial.print(F("Time: "));
   Serial.print(time);
+  Serial.print(F(" Ext Temp: "));
+  Serial.print(externalTemp);
   Serial.print(F(" Humidity: "));
-  Serial.print(h);
+  Serial.print(dhth);
   Serial.print(F("%  Temperature: "));
-  Serial.print(temp);
+  Serial.print(dhttemp);
   Serial.print(F("°C "));
 }
