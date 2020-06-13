@@ -13,6 +13,16 @@ MOSI = 12
 SCK = 11
 CS = 10
 ---> RTC
+SCL -> A5
+SDA -> A4
+DS -> 4
+
+LIBRARIES REQUIRED
+-> DHT
+-> SPI
+-> SD
+-> Wire
+-> RTClib
 */
 
 // setup DHT
@@ -32,11 +42,14 @@ File myFile;
 #include <RTClib.h>
 RTC_DS1307 rtc;
 
+// setup RTC thermo DS!8B20
+#include <OneWire.h>
+#include <DallasTemperature.h>
+#define ONE_WIRE_BUS 4
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+
 void setup() {
-	pinMode(A3, OUTPUT);
-	pinMode(A2, OUTPUT);
-	digitalWrite(A3, HIGH); // acting as VCC
-	digitalWrite(A2, LOW);  // acting as GND
 	Serial.begin(9600);
 	Serial.println("Initializing SD card...");
 	if (!SD.begin(10)) {
@@ -57,6 +70,7 @@ void setup() {
 
 	Serial.print("Initializing DHT...");
 	dht.begin();
+	sensors.begin();
 	Serial.println("End of setup");
 }
 
@@ -65,6 +79,9 @@ void loop() {
     // Reading the sensor	
 	delay(2000);
 	Serial.println("In loop");
+	sensors.requestTemperatures();
+
+	Serial.print(sensors.getTempCByIndex(0));
 	DateTime now = rtc.now();
 	long time = now.unixtime();
     float h = dht.readHumidity();
