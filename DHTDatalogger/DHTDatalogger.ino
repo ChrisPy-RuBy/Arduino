@@ -100,7 +100,7 @@ void setup() {
 void loop() {
 
     // Reading the sensor	
-	delay(2000);
+	delay(120000);
 	
 	digitalWrite(RED, LOW);
 	digitalWrite(GREEN, HIGH);
